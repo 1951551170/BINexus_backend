@@ -39,7 +39,7 @@ public class LogInterceptor {
         Object result = point.proceed();
 
         long end = System.currentTimeMillis();
-        long cost=end-begin;
+        long cost= end-begin;
         log.info("request end:{}.cost:{}ms",end,cost);
         return result;
     }
