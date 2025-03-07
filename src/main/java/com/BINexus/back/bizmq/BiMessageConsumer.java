@@ -54,8 +54,11 @@ public class BiMessageConsumer {
             handleChartUpdateError(chart.getId(), "更新图表执行中状态失败");
             return;
         }
+        //通过用户信息构建提供ai的问语
+        String s = buildUserInput(chart);
+
         // 调用 AI
-        String result = aiManager.doChat(CommonConstant.BI_MODEL_ID, buildUserInput(chart));
+        String result = aiManager.doChat(CommonConstant.BI_MODEL_ID, s);
         String[] splits = result.split("【【【【【");
         if (splits.length < 3) {
             channel.basicNack(deliveryTag, false, false);
@@ -98,6 +101,8 @@ public class BiMessageConsumer {
             userGoal += "，请使用" + chartType;
         }
         userInput.append(userGoal).append("\n");
+
+        // 拼接原始数据
         userInput.append("原始数据：").append("\n");
         userInput.append(csvData).append("\n");
         return userInput.toString();
