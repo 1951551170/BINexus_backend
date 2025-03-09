@@ -3,10 +3,12 @@ package com.BINexus.back.bizmq;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 用于创建测试程序用到的交换机和队列（只用在程序启动前执行一次）
  */
+@Slf4j
 public class BiInitMain {
 
     public static void main(String[] args) {
@@ -23,7 +25,7 @@ public class BiInitMain {
             channel.queueDeclare(queueName, true, false, false, null);
             channel.queueBind(queueName, EXCHANGE_NAME,  BiMqConstant.BI_ROUTING_KEY);
         } catch (Exception e) {
-
+            log.error("mq初始化异常:{}",e);
         }
 
     }

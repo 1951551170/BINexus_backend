@@ -1,7 +1,6 @@
 package com.BINexus.back.controller;
 
 import cn.hutool.core.io.FileUtil;
-import com.BINexus.back.bizmq.BiMessageProducer;
 import com.BINexus.back.common.BaseResponse;
 import com.BINexus.back.common.DeleteRequest;
 import com.BINexus.back.common.ErrorCode;
@@ -455,7 +454,7 @@ public class ChartController {
         String sortField = chartQueryRequest.getSortField();
         String sortOrder = chartQueryRequest.getSortOrder();
 
-        queryWrapper.eq(id!=null&&id>0,"id",id);
+        queryWrapper.eq(id!=null && id>0,"id",id);
         queryWrapper.like(StringUtils.isNotBlank(name), "name", name);
         queryWrapper.eq(StringUtils.isNotBlank(goal), "goal", goal);
         queryWrapper.eq(StringUtils.isNotBlank(chartType), "chartType", chartType);
