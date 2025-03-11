@@ -6,6 +6,6 @@ import lombok.Data;
  * @author admin
  */
 @Data
-public class genInvitationCodeVo {
+public class GenInvitationCodeVo {
     private String invitationCode;
 }

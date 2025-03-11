@@ -4,7 +4,7 @@ package com.BINexus.back.controller;
 import com.BINexus.back.annotation.AuthCheck;
 import com.BINexus.back.common.BaseResponse;
 import com.BINexus.back.constant.UserConstant;
-import com.BINexus.back.model.vo.genInvitationCodeVo;
+import com.BINexus.back.model.vo.GenInvitationCodeVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +18,7 @@ public class InviteController {
     //TODO：后续可以加个管理页面，让验证码失效等。现在整个小页面，生产过哪些，是否被用了，谁用的。页面上整个按钮就可以增加一个
     @GetMapping("/genCode")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<genInvitationCodeVo> genInvitationCode(){
+    public BaseResponse<GenInvitationCodeVo> genInvitationCode(){
         //先生成一个加密的邀请码，随机12位字符串
         //保存到数据库
         //返回信息
