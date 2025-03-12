@@ -40,7 +40,7 @@ public class User implements Serializable {
     private String userAvatar;
 
     /**
-     * 用户角色：user/admin
+     * 用户角色：new/user/admin
      */
     private String userRole;
 

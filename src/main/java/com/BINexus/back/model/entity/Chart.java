@@ -66,6 +66,11 @@ public class Chart implements Serializable {
      */
     private Long userId;
 
+    /**
+     * 来源 0:自主生成 1：通过分享生成
+     */
+    private Byte source;
+
 
     /**
      * 创建时间

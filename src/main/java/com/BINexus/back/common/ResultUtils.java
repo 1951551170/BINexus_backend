@@ -1,5 +1,7 @@
 package com.BINexus.back.common;
 
+import static jdk.nashorn.tools.Shell.SUCCESS;
+
 /**
  * 返回工具类
  *
@@ -15,7 +17,7 @@ public class ResultUtils {
      * @return
      */
     public static <T> BaseResponse<T> success(T data) {
-        return new BaseResponse<>(0, data, "ok");
+        return new BaseResponse<>(SUCCESS, data, "ok");
     }
 
     /**

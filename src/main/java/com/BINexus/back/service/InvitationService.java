@@ -7,4 +7,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface InvitationService extends IService<Invitation> {
     public BaseResponse<GenInvitationCodeVo> genInvitationCode(Long operatorId);
+
+    BaseResponse<Boolean> acceptInvite(Long id, String code);
+
 }

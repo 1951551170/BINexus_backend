@@ -10,10 +10,8 @@ import com.BINexus.back.exception.BusinessException;
 import com.BINexus.back.exception.ThrowUtils;
 import com.BINexus.back.manager.AiManager;
 import com.BINexus.back.manager.RedisLimiterManager;
-import com.BINexus.back.model.dto.chart.ChartAddRequest;
-import com.BINexus.back.model.dto.chart.ChartEditRequest;
-import com.BINexus.back.model.dto.chart.ChartQueryRequest;
-import com.BINexus.back.model.dto.chart.GenChartByAiRequest;
+import com.BINexus.back.model.dto.Share.ShareChartRequest;
+import com.BINexus.back.model.dto.chart.*;
 import com.BINexus.back.model.entity.Chart;
 import com.BINexus.back.model.entity.User;
 import com.BINexus.back.model.vo.BiResponse;
@@ -65,29 +63,27 @@ public class ChartController {
 
 
 
-
     // region 增删改查
 
     /**
-     * 创建
+     * 通过分享创建
      *
-     * @param chartAddRequest
-     * @param request
-     * @return
      */
-    @PostMapping("/add")
-    public BaseResponse<Long> addChart(@RequestBody ChartAddRequest chartAddRequest, HttpServletRequest request) {
-        if (chartAddRequest == null) {
+    @PostMapping("/addByShare")
+    public BaseResponse<Long> addChart(@RequestBody ShareChartRequest shareChartRequest, HttpServletRequest request) {
+        if (shareChartRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Chart chart = new Chart();
-        BeanUtils.copyProperties(chartAddRequest, chart);
+        Long chartId = shareChartRequest.getChartId();
+        Chart chartDTO = chartService.getById(chartId);
+        Chart newChart = new Chart();
+        BeanUtils.copyProperties(chartDTO,newChart);
         User loginUser = userService.getLoginUser(request);
-        chart.setUserId(loginUser.getId());
-
-        boolean result = chartService.save(chart);
+        newChart.setUserId(loginUser.getId());
+        newChart.setSource((byte)1);
+        boolean result = chartService.save(newChart);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-        long newChartId = chart.getId();
+        long newChartId = newChart.getId();
         return ResultUtils.success(newChartId);
     }
 
