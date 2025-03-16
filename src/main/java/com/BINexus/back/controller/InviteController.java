@@ -10,10 +10,7 @@ import com.BINexus.back.model.vo.GenInvitationCodeVo;
 import com.BINexus.back.service.InvitationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -36,7 +33,7 @@ public class InviteController {
 
     //接受验证码
     @PostMapping("/acceptInvite")
-    public BaseResponse<Boolean> acceptInvite(HttpServletRequest request,String code){
+    public BaseResponse<Boolean> acceptInvite(@RequestBody String code,HttpServletRequest request){
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
         User currentUser = (User) userObj;
         return invitationService.acceptInvite(currentUser.getId(),code);

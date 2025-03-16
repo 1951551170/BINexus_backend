@@ -1,16 +1,18 @@
 package com.BINexus.back.service.impl;
 
 import com.BINexus.back.mapper.ShareMapper;
+import com.BINexus.back.model.entity.Chart;
 import com.BINexus.back.model.entity.Share;
+import com.BINexus.back.service.ChartService;
 import com.BINexus.back.service.ShareService;
 import com.BINexus.back.utils.AESEncryptor;
-import org.springframework.stereotype.Service;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.List;
 
 @Service
 public class ShareServiceImpl extends ServiceImpl<ShareMapper, Share> implements ShareService {
@@ -18,28 +20,54 @@ public class ShareServiceImpl extends ServiceImpl<ShareMapper, Share> implements
     @Resource
     private ShareMapper shareMapper;
 
-    private final String secretKeyBase64 = "cGV0cmVjZVNlY3JldEtleUtleUtleQ=="; // petreceSecretKeyKeyKey
+    @Resource
+    private ChartService chartService;
+
+    private final String secretKeyBase64 = "cGV0cmVjZVNlY3JldEtleQ=="; //
 
     @Override
-    public String createShareLink(Long chartId, Long operatorId) throws Exception {
+    public String createShareLink(Long chartId, Long operatorId) {
         Share share = new Share();
         share.setChartId(chartId);
         share.setOperatorId(operatorId);
         share.setCreateTime(LocalDateTime.now());
+        String encryptedUrl = null;
+        try {
+            AESEncryptor aesEncryptor = new AESEncryptor(secretKeyBase64);
+            encryptedUrl = aesEncryptor.encrypt(chartId.toString());
+        }catch(Exception e) {
+            throw new RuntimeException("加密失败");
+        }
 
-        AESEncryptor aesEncryptor = new AESEncryptor(secretKeyBase64);
-        String encryptedUrl = aesEncryptor.encrypt(share.getId().toString());
         share.setUrl(encryptedUrl);
         this.save(share);
-        return "http://localHost:8081/api/share/" + encryptedUrl;
+        return "http://localhost:8081/api/share/url/" + encryptedUrl;
     }
 
     @Override
-    public Share getShareByEncryptedUrl(String encryptedUrl) throws Exception {
+    public Share getShareByEncryptedUrl(String encryptedUrl, Long operatorId) throws Exception {
         AESEncryptor aesEncryptor = new AESEncryptor(secretKeyBase64);
         String decryptedUrl = aesEncryptor.decrypt(encryptedUrl);
 
-        Long id = Long.parseLong(decryptedUrl);
-        return this.getById(id);
+        Long chartId = Long.parseLong(decryptedUrl);
+        QueryWrapper<Share> wrapper = new QueryWrapper<>();
+        wrapper.eq("chartId", chartId);
+
+        Share share = this.getOne(wrapper);
+        if (share == null) {
+            throw new Exception("分享链接不存在");
+        }
+        Chart chart = chartService.getById(chartId);
+        Chart newChart = new Chart();
+        BeanUtils.copyProperties(chart,newChart);
+        newChart.setId(null);
+        newChart.setUserId(operatorId);
+        newChart.setCreateTime(null);
+        newChart.setUpdateTime(null);
+        boolean save = chartService.save(newChart);
+        if(!save) {
+            throw new Exception("保存失败");
+        }
+        return share;
     }
 }

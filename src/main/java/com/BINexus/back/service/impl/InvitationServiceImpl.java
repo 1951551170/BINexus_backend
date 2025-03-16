@@ -78,29 +78,34 @@ public class InvitationServiceImpl extends ServiceImpl<InvitationMapper, Invitat
         Invitation invitation = this.getOne(wrapper);
 
         if (invitation == null) {
-            throw new RuntimeException("无效的邀请码");
+            throw new BusinessException("无效的邀请码");
         }
 
         // 检查邀请码是否已经被使用
         if (invitation.getStatus() == 1) {
-            throw new RuntimeException("该邀请码已被使用");
+            throw new BusinessException("该邀请码已被使用");
         }
 
         // 检查接收者是否已经是邀请者
-        if (invitation.getReceiverId() != null && invitation.getOperatorId().equals(receiverId)) {
-            throw new RuntimeException("操作失败");
+        if (invitation.getReceiverId() == null && invitation.getOperatorId().equals(receiverId)) {
+            throw new BusinessException("操作失败");
         }
 
         // 获取用户信息
         User user = userMapper.selectById(receiverId);
 
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
 
         // 检查用户当前角色
-        if ("user".equalsIgnoreCase(user.getUserRole())) {
-            throw new RuntimeException("您已经可以正常使用系统，请把邀请码留给别人吧~");
+        if ("admin".equals(user.getUserRole())) {
+            throw new BusinessException("您是管理员，请把邀请码留给别人吧~");
+        }
+
+        // 检查用户当前角色
+        if ("user".equals(user.getUserRole())) {
+            throw new BusinessException("您已经可以正常使用系统，请把邀请码留给别人吧~");
         }
 
         // 更新用户角色为User
@@ -126,7 +131,7 @@ public class InvitationServiceImpl extends ServiceImpl<InvitationMapper, Invitat
         List<Invitation> invitations = this.list(wrapper);
         log.info("结果为" + invitations);
         if (invitations.isEmpty()) {
-            throw new RuntimeException("您没有邀请码");
+            throw new BusinessException("您没有邀请码");
         }
         // 构造成功响应
         return new BaseResponse<>(invitations);

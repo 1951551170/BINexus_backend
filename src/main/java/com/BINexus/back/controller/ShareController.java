@@ -20,8 +20,7 @@ public class ShareController {
     private ShareService shareService;
 
     @PostMapping("/create")
-    public BaseResponse<String> createShareLink(Long chartId, HttpServletRequest request) {
-        try {
+    public BaseResponse<String> createShareLink(@RequestBody Long chartId, HttpServletRequest request) {
             Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
             User currentUser = (User) userObj;
             if (currentUser == null || currentUser.getId() == null) {
@@ -29,16 +28,18 @@ public class ShareController {
             }
             String shareLink = shareService.createShareLink(chartId, currentUser.getId());
             return new BaseResponse<>(shareLink);
-        } catch (Exception e) {
-            throw new BusinessException("失败: " + e.getMessage());
-        }
     }
 
-    @GetMapping("/{encryptedUrl}")
-    public BaseResponse<Share> getSharedAnalysis(@PathVariable String encryptedUrl) throws Exception {
-        Share share = shareService.getShareByEncryptedUrl(encryptedUrl);
+    @GetMapping("/url/{encryptedUrl}")
+    public BaseResponse<Share> getSharedAnalysis(@PathVariable String encryptedUrl, HttpServletRequest request) throws Exception {
+        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        User currentUser = (User) userObj;
+        if (currentUser == null || currentUser.getId() == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        Share share = shareService.getShareByEncryptedUrl(encryptedUrl, currentUser.getId());
         if (share == null) {
-            throw new RuntimeException("未找到分享");
+            throw new BusinessException("未找到分享");
         }
         return new BaseResponse<>(share);
 

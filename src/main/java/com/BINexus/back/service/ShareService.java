@@ -1,10 +1,9 @@
 package com.BINexus.back.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.BINexus.back.model.entity.Share;
-import java.util.List;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface ShareService extends IService<Share> {
-    String createShareLink(Long chartId, Long operatorId) throws Exception;
-    Share getShareByEncryptedUrl(String encryptedUrl) throws Exception;
+    String createShareLink(Long chartId, Long operatorId);
+    Share getShareByEncryptedUrl(String encryptedUrl, Long operatorId) throws Exception;
 }

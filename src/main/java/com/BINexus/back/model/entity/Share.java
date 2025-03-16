@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @TableName(value ="share")
 @Data
 public class Share {
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     //chartID

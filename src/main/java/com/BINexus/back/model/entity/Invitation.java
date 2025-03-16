@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Data
 public class Invitation {
     @ApiModelProperty("id")
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     @ApiModelProperty("邀请码")
