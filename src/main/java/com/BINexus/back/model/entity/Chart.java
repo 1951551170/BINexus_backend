@@ -69,6 +69,7 @@ public class Chart implements Serializable {
     /**
      * 来源 0:自主生成 1：通过分享生成
      */
+    @TableField(exist = false)
     private Byte source;
 
 

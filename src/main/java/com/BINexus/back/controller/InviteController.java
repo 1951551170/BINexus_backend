@@ -4,6 +4,7 @@ package com.BINexus.back.controller;
 import com.BINexus.back.annotation.AuthCheck;
 import com.BINexus.back.common.BaseResponse;
 import com.BINexus.back.constant.UserConstant;
+import com.BINexus.back.model.entity.Invitation;
 import com.BINexus.back.model.entity.User;
 import com.BINexus.back.model.vo.GenInvitationCodeVo;
 import com.BINexus.back.service.InvitationService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -38,6 +40,15 @@ public class InviteController {
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
         User currentUser = (User) userObj;
         return invitationService.acceptInvite(currentUser.getId(),code);
+    }
+
+    @GetMapping("/getAllInvitationCode")
+    public BaseResponse<List<Invitation>> getAllInvitationCode(HttpServletRequest request){
+        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        User currentUser = (User) userObj;
+        BaseResponse<List<Invitation>> allInvitationCode = invitationService.getAllInvitationCode(currentUser.getId());
+        log.info(""+allInvitationCode);
+        return allInvitationCode;
     }
 
 }

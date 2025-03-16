@@ -11,7 +11,9 @@ import com.BINexus.back.exception.ThrowUtils;
 import com.BINexus.back.manager.AiManager;
 import com.BINexus.back.manager.RedisLimiterManager;
 import com.BINexus.back.model.dto.Share.ShareChartRequest;
-import com.BINexus.back.model.dto.chart.*;
+import com.BINexus.back.model.dto.chart.ChartEditRequest;
+import com.BINexus.back.model.dto.chart.ChartQueryRequest;
+import com.BINexus.back.model.dto.chart.GenChartByAiRequest;
 import com.BINexus.back.model.entity.Chart;
 import com.BINexus.back.model.entity.User;
 import com.BINexus.back.model.vo.BiResponse;
@@ -19,12 +21,16 @@ import com.BINexus.back.service.ChartService;
 import com.BINexus.back.service.UserService;
 import com.BINexus.back.utils.ExcelUtils;
 import com.BINexus.back.utils.SqlUtils;
+import com.alibaba.dashscope.aigc.generation.GenerationResult;
+import com.alibaba.dashscope.exception.InputRequiredException;
+import com.alibaba.dashscope.exception.NoApiKeyException;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -61,6 +67,8 @@ public class ChartController {
     @Resource
     private ThreadPoolExecutor threadPoolExecutor;
 
+    @Autowired
+    private QianWenAI qianWenAI;
 
 
     // region 增删改查
@@ -215,8 +223,8 @@ public class ChartController {
      * @return
      */
     @PostMapping("/gen")
-    public BaseResponse<BiResponse> genChartByAi(@RequestPart("file") MultipartFile multipartFile,
-                                                 GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) {
+    public BaseResponse<BiResponse> genChartByAi(MultipartFile multipartFile,
+                                                 GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) throws NoApiKeyException, InputRequiredException {
         String name = genChartByAiRequest.getName();
         String goal = genChartByAiRequest.getGoal();
         String chartType = genChartByAiRequest.getChartType();
@@ -224,7 +232,9 @@ public class ChartController {
         // 校验
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR,"目标为空");
         ThrowUtils.throwIf(StringUtils.isBlank(name)&&name.length()>100, ErrorCode.PARAMS_ERROR,"名称过长");
-
+        if (name!=null){
+            throw new BusinessException(ErrorCode.TOKEN_EXPIRE);
+        }
         //获取文件
         long size = multipartFile.getSize();
         String fileName = multipartFile.getOriginalFilename();
@@ -243,7 +253,7 @@ public class ChartController {
         redisLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
 
 
-        long biModelId = CommonConstant.BI_MODEL_ID;
+        //long biModelId = CommonConstant.BI_MODEL_ID;
 
         //开始拼接
         StringBuilder userInput = new StringBuilder();
@@ -265,10 +275,22 @@ public class ChartController {
         userInput.append(csvData).append("\n");
 
        //调用AI
-        String result=aiManager.doChat(biModelId,userInput.toString());
+        //String que=aiManager.doChat(biModelId,userInput.toString());
+
+
+        GenerationResult result = qianWenAI.callWithMessage(userInput.toString());
+//            System.out.println("思考过程：");
+//            System.out.println(result.getOutput().getChoices().get(0).getMessage().getReasoningContent());
+        System.out.println("回复内容："+ result.getOutput().getChoices().get(0).getMessage().getContent()+"\n");
+        String aiResult = result.getOutput().getChoices().get(0).getMessage().getContent();
+
+
+
+
+
 
         //格式化ai生成结果
-        String[] split = result.split("【【【【【");//因为设置了ai回答用【【【【【间隔
+        String[] split = aiResult.split("【【【【【");//因为设置了ai回答用【【【【【间隔
         if (split.length<3){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"AI生成错误");
         }

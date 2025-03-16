@@ -11,15 +11,17 @@ import com.BINexus.back.service.InvitationService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Service
+@Slf4j
 public class InvitationServiceImpl extends ServiceImpl<InvitationMapper, Invitation> implements InvitationService {
 
     @Autowired
@@ -111,6 +113,23 @@ public class InvitationServiceImpl extends ServiceImpl<InvitationMapper, Invitat
         invitationMapper.updateById(invitation);
 
         return new BaseResponse<>(true);
+    }
+
+    @Override
+    public BaseResponse<List<Invitation>> getAllInvitationCode(Long id) {
+        log.info("用户id为" + id);
+        // 创建查询条件
+        LambdaQueryWrapper<Invitation> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(Invitation::getOperatorId, id);
+
+        // 查询所有符合条件的邀请码
+        List<Invitation> invitations = this.list(wrapper);
+        log.info("结果为" + invitations);
+        if (invitations.isEmpty()) {
+            throw new RuntimeException("您没有邀请码");
+        }
+        // 构造成功响应
+        return new BaseResponse<>(invitations);
     }
 
     /**
