@@ -19,8 +19,8 @@ public class ShareController {
     @Resource
     private ShareService shareService;
 
-    @PostMapping("/create")
-    public BaseResponse<String> createShareLink(@RequestBody Long chartId, HttpServletRequest request) {
+    @GetMapping("/create")
+    public BaseResponse<String> createShareLink(@RequestParam Long chartId, HttpServletRequest request) {
             Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
             User currentUser = (User) userObj;
             if (currentUser == null || currentUser.getId() == null) {

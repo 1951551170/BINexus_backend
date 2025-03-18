@@ -1,14 +1,12 @@
 package com.BINexus.back.service.impl;
 
 import com.BINexus.back.mapper.ShareMapper;
-import com.BINexus.back.model.entity.Chart;
 import com.BINexus.back.model.entity.Share;
 import com.BINexus.back.service.ChartService;
 import com.BINexus.back.service.ShareService;
 import com.BINexus.back.utils.AESEncryptor;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -41,7 +39,7 @@ public class ShareServiceImpl extends ServiceImpl<ShareMapper, Share> implements
 
         share.setUrl(encryptedUrl);
         this.save(share);
-        return "http://localhost:8081/api/share/url/" + encryptedUrl;
+        return "http://localhost:8080/share/url/" + encryptedUrl;
     }
 
     @Override
@@ -57,17 +55,7 @@ public class ShareServiceImpl extends ServiceImpl<ShareMapper, Share> implements
         if (share == null) {
             throw new Exception("分享链接不存在");
         }
-        Chart chart = chartService.getById(chartId);
-        Chart newChart = new Chart();
-        BeanUtils.copyProperties(chart,newChart);
-        newChart.setId(null);
-        newChart.setUserId(operatorId);
-        newChart.setCreateTime(null);
-        newChart.setUpdateTime(null);
-        boolean save = chartService.save(newChart);
-        if(!save) {
-            throw new Exception("保存失败");
-        }
+
         return share;
     }
 }

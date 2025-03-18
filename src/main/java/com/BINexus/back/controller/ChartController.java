@@ -78,7 +78,7 @@ public class ChartController {
      *
      */
     @PostMapping("/addByShare")
-    public BaseResponse<Long> addChart(@RequestBody ShareChartRequest shareChartRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> addChart(@RequestBody ShareChartRequest shareChartRequest) {
         if (shareChartRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -86,13 +86,12 @@ public class ChartController {
         Chart chartDTO = chartService.getById(chartId);
         Chart newChart = new Chart();
         BeanUtils.copyProperties(chartDTO,newChart);
-        User loginUser = userService.getLoginUser(request);
-        newChart.setUserId(loginUser.getId());
+        newChart.setUserId(shareChartRequest.getOperatorId());
         newChart.setSource((byte)1);
+        newChart.setId(null);
         boolean result = chartService.save(newChart);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-        long newChartId = newChart.getId();
-        return ResultUtils.success(newChartId);
+        return ResultUtils.success(true);
     }
 
     /**
@@ -128,7 +127,7 @@ public class ChartController {
      * @return
      */
     @GetMapping("/get")
-    public BaseResponse<Chart> getChartById(long id, HttpServletRequest request) {
+    public BaseResponse<Chart> getChartById(@RequestParam long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
